@@ -243,13 +243,18 @@ class QuantWebServer:
             })
         return web.json_response({"status": "ok", "is_active": self.kill_switch.is_active})
 
+    async def handle_index(self, request):
+        return web.FileResponse("web/index.html")
+
     def run(self):
         app = web.Application()
+        app.router.add_get("/", self.handle_index)
+        app.router.add_get("/index.html", self.handle_index)
         app.router.add_get("/api/data", self.handle_get_data)
         app.router.add_post("/api/trigger_scan", self.handle_trigger_scan)
         app.router.add_post("/api/kill_switch", self.handle_kill_switch)
-        # Serve static web directory
-        app.router.add_static("/", path="web", show_index=True)
+        # Serve static web directory (css, js, etc.)
+        app.router.add_static("/", path="web")
 
         app.on_startup.append(self.start_background_tasks)
         app.on_cleanup.append(self.cleanup_background_tasks)
