@@ -1,0 +1,44 @@
+symbols:
+  DOGE-USDT:
+    bingx_perp_symbol: "DOGE-USDT"
+    bingx_spot_symbol: "DOGE-USDT"
+    tick_size: 0.00001
+    step_size: 1.0
+    min_qty: 10.0
+    max_leverage: 5
+    maker_fee: 0.0002
+    taker_fee: 0.0005
+    description: "Dogecoin"
+
+  PEPE-USDT:
+    bingx_perp_symbol: "1000PEPE-USDT"
+    bingx_spot_symbol: "PEPE-USDT"
+    tick_size: 0.0000001
+    step_size: 100.0
+    min_qty: 1000.0
+    max_leverage: 5
+    maker_fee: 0.0002
+    taker_fee: 0.0005
+    description: "Pepe"
+
+  WIF-USDT:
+    bingx_perp_symbol: "WIF-USDT"
+    bingx_spot_symbol: "WIF-USDT"
+    tick_size: 0.0001
+    step_size: 0.1
+    min_qty: 1.0
+    max_leverage: 5
+    maker_fee: 0.0002
+    taker_fee: 0.0005
+    description: "dogwifhat"
+
+  BONK-USDT:
+    bingx_perp_symbol: "1000BONK-USDT"
+    bingx_spot_symbol: "BONK-USDT"
+    tick_size: 0.000001
+    step_size: 100.0
+    min_qty: 1000.0
+    max_leverage: 5
+    maker_fee: 0.0002
+    taker_fee: 0.0005
+    description: "Bonk"

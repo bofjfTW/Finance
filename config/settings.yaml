@@ -1,0 +1,51 @@
+system:
+  project_name: "Crypto-MultiAgent-Quant-Bot"
+  version: "2.0"
+  timezone: "Asia/Taipei"
+  log_level: "INFO"
+
+trading:
+  symbols:
+    - "DOGE-USDT"
+    - "PEPE-USDT"
+    - "WIF-USDT"
+    - "BONK-USDT"
+  entry_schedule_minutes: [0, 20, 40]
+  max_open_symbols: 2
+  allow_short: true
+  markets:
+    - "perpetual"
+    - "spot"
+  default_market: "perpetual"
+
+exit:
+  pnl_measure: "net_position_roi"  # Leveraged Net ROI
+  soft_take_profit: 0.15           # +15% activates trailing stop / soft exit
+  hard_take_profit: 0.30           # +30% hard target exit
+  soft_stop_loss: -0.05            # -5% dynamic stop loss
+  hard_stop_loss: -0.10            # -10% hard stop cap
+  trailing_enabled: true
+  trailing_callback_rate: 0.03     # 3% callback from peak ROI after reaching soft TP
+
+risk:
+  base_trade_risk: 0.01            # 1.0% account equity risk per trade
+  dynamic_trade_risk_min: 0.0025   # 0.25% min
+  dynamic_trade_risk_max_research: 0.03 # 3.0% max research
+  max_leverage: 5                  # Maximum system leverage
+  default_leverage: 2              # V1 safe initial leverage (1x-2x)
+  max_drawdown_limit: 0.20         # 20% max research MDD limit
+  max_daily_loss: 0.05             # 5% max daily account loss
+  max_consecutive_losses: 3        # Pause entry after 3 consecutive losses
+  cooldown_periods_after_consecutive_losses: 3 # Pause for 3 windows (60 mins)
+  max_spread_bps: 30.0             # 30 bps spread limit (0.3%)
+  stale_data_timeout_sec: 15.0     # 15s data stale threshold
+
+exchange:
+  name: "bingx"
+  environment: "demo"  # paper, demo, live
+  spot_ws_url: "wss://open-api-ws.bingx.com/market"
+  perp_ws_url: "wss://open-api-swap.bingx.com/swap-market"
+  rest_base_url: "https://open-api.bingx.com"
+  perp_rest_base_url: "https://open-api-swap.bingx.com"
+  api_key: ""
+  secret_key: ""
