@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BingX Multi-Agent 量化交易控制台 v2.0</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div class="glow-bg-top"></div>
+  <div class="glow-bg-bottom"></div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="brand-logo">
+        <span class="logo-icon">◈</span>
+        <div class="logo-text">
+          <h1>BingX Multi-Agent <span>QuantBot v2.0</span></h1>
+          <p class="subtitle">DOGE / PEPE / WIF / BONK 高頻微結構與多策略監控系統</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="schedule-pill">
+        <span class="pulse-dot"></span>
+        <span class="schedule-label">20 分鐘進場決策窗口倒數：</span>
+        <span id="countdownTimer" class="countdown-val">19:42</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div id="systemStatusPill" class="status-pill status-healthy">
+        <span class="status-dot"></span>
+        <span id="systemStatusText">系統健康 (Healthy)</span>
+      </div>
+      <button id="btnKillSwitch" class="btn btn-danger" title="緊急停止所有新進場與掛單">
+        <span class="btn-icon">⚠</span> Kill Switch
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="dashboard-grid">
+    <!-- Row 1: Key Metrics Bar -->
+    <section class="metrics-row">
+      <div class="metric-card glass-panel">
+        <div class="metric-header">
+          <span class="metric-label">總帳戶權益 (Total Equity)</span>
+          <span class="badge badge-accent">USDT</span>
+        </div>
+        <div class="metric-value font-mono" id="metricTotalEquity">$1,000.00</div>
+        <div class="metric-sub">
+          <span>可用餘額：</span><span id="metricAvailBalance" class="font-mono text-muted">$831.39</span>
+        </div>
+      </div>
+
+      <div class="metric-card glass-panel">
+        <div class="metric-header">
+          <span class="metric-label">今日已實現損益 (Realized PnL)</span>
+          <span class="metric-badge" id="badgePnlRate">+0.00%</span>
+        </div>
+        <div class="metric-value font-mono text-success" id="metricRealizedPnl">+$0.00</div>
+        <div class="metric-sub">
+          <span>勝率：</span><span id="metricWinRate" class="font-mono text-muted">0.0% (0 筆)</span>
+        </div>
+      </div>
+
+      <div class="metric-card glass-panel">
+        <div class="metric-header">
+          <span class="metric-label">未實現損益 (Unrealized PnL)</span>
+          <span class="badge badge-primary">浮動</span>
+        </div>
+        <div class="metric-value font-mono" id="metricUnrealizedPnl">$0.00</div>
+        <div class="metric-sub">
+          <span>當前持倉占用：</span><span id="metricUsedMargin" class="font-mono text-muted">$0.00</span>
+        </div>
+      </div>
+
+      <div class="metric-card glass-panel">
+        <div class="metric-header">
+          <span class="metric-label">風控警戒 (Risk Engine)</span>
+          <span class="badge badge-success">正常</span>
+        </div>
+        <div class="metric-value font-mono text-cyan" id="metricMaxDrawdown">0.00%</div>
+        <div class="metric-sub">
+          <span>研究上限：</span><span class="font-mono text-muted">MDD ≤ 20% | 槓桿 ≤ 5x</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Row 2: Live Market Tickers & OrderBook Microstructure -->
+    <section class="section-container">
+      <div class="section-header">
+        <h2>即時行情與訂單簿微結構 (BingX WebSocket 500ms)</h2>
+        <span class="refresh-indicator"><span class="live-pulse"></span> 數據持續串流中</span>
+      </div>
+      <div class="market-grid" id="marketCardsContainer">
+        <!-- Dynamic Ticker Cards inserted here -->
+      </div>
+    </section>
+
+    <!-- Row 3: Two Columns (20-Min Opportunity & Active Positions) -->
+    <div class="dual-columns">
+      <!-- Left: 20-min Entry Gate Opportunities -->
+      <section class="column-panel glass-panel">
+        <div class="panel-header">
+          <div class="header-with-badge">
+            <h3>20 分鐘新進場機會排序 (Best 1～2 Coins)</h3>
+            <span class="badge badge-subtle">每輪限開 1～2 部位</span>
+          </div>
+          <button id="btnManualScan" class="btn btn-sm btn-outline">
+            <span>⟳</span> 立即評估
+          </button>
+        </div>
+        <div class="table-container">
+          <table class="custom-table" id="tableOpportunities">
+            <thead>
+              <tr>
+                <th width="45">排名</th>
+                <th>標的</th>
+                <th>策略建議</th>
+                <th class="text-right">預期淨 Edge</th>
+                <th class="text-right">信賴度</th>
+                <th class="text-center">狀態審核</th>
+              </tr>
+            </thead>
+            <tbody id="oppTableBody">
+              <!-- Dynamic Rows -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Right: Active Positions & Continuous TP/SL Monitor -->
+      <section class="column-panel glass-panel">
+        <div class="panel-header">
+          <div class="header-with-badge">
+            <h3>即時持倉與動態停利停損 (Continuous Exit Monitor)</h3>
+            <span class="badge badge-accent">24/7 持續監控</span>
+          </div>
+          <div class="rule-hint">
+            <span class="hint-sl">-5%~-10% 止損</span>
+            <span class="hint-tp">+15% 追蹤 / +30% 硬停利</span>
+          </div>
+        </div>
+
+        <div class="positions-list" id="positionsContainer">
+          <!-- Dynamic Position Cards -->
+        </div>
+      </section>
+    </div>
+
+    <!-- Row 4: Trade Audit Ledger & Event Log -->
+    <section class="section-container glass-panel panel-audit">
+      <div class="panel-header">
+        <div class="header-with-badge">
+          <h3>交易審計日誌與系統事件 (Trace ID Audit Trail)</h3>
+          <span class="badge badge-subtle">可回溯歷史決策</span>
+        </div>
+        <div class="audit-actions">
+          <span class="log-count" id="logCountText">0 筆記錄</span>
+        </div>
+      </div>
+      <div class="audit-log-box" id="auditLogContainer">
+        <!-- Live Log Lines -->
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
